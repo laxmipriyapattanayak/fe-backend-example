@@ -27,3 +27,8 @@ footer span {
   font-size: smaller;
   color: gray;
 }
+
+span {
+  color: blue;
+  cursor: pointer;
+}

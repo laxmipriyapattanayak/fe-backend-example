@@ -3,16 +3,25 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchEmployee, addEmployee, deleteEmployee, updateEmployee } from '../employeeSlice'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
+import { loginStatus } from '../loginSlice';
 
 const Employee = () => {
   const dispatch = useDispatch();
   const {employee, error, apiReply}  = useSelector((state) => state.empStore)
+  const {isLogin, username}  = useSelector((state) => state.loginStore)
+
   const [emp, setEmp] = useState({name: '', designation: ''});
   const [update, isUpdate] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchEmployee())
-  }, [dispatch])
+    if(isLogin) {
+        dispatch(fetchEmployee())
+    } else {
+        navigate("/")
+    } 
+  }, [dispatch, isLogin, navigate])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -21,11 +30,9 @@ const Employee = () => {
         isUpdate(false)
         toast(`Updated Successful`)
     } else {
-        //calling update api
         dispatch(addEmployee(emp))
         toast(`Insert Successful`)
     }
-    //calling fetch api to get fresh data
     dispatch(fetchEmployee())
     setEmp({name: '', designation: ''})
   }
@@ -45,9 +52,15 @@ const Employee = () => {
     isUpdate(true)
   }
 
+  const handleLogout = () => {
+    dispatch(loginStatus({status: false, username: ''}))
+  }
+
   return (
     <div className='app'>
         <section>{error}</section>
+        <p>Welcome {username} / <span onClick={handleLogout}>Logout</span></p>
+        <hr/>
         <section>
             <form onSubmit={(e) => handleSubmit(e)}>
                 <input name="name" value={emp.name} placeholder='Name' onChange={(e) => handleChange(e)}/>
